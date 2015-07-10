@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 
+import java.io.FileNotFoundException;
+
 /**
  * Created by eliasbagley on 7/8/15.
  */
@@ -27,7 +29,7 @@ public class ImageContainer implements MediaContainer {
         return this.filename;
     }
 
-    public String getBase64encodedImage() {
+    public String getBase64encodedImage() throws FileNotFoundException {
         return ImageUtils.fileToBase64(filename);
     }
 

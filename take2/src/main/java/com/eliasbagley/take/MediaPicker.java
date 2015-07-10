@@ -9,17 +9,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
 
-import com.timemachine.timemachineandroid.R;
-import com.timemachine.timemachineandroid.utils.ImageUtils;
-import com.timemachine.timemachineandroid.utils.Utils;
-
 import java.io.File;
 import java.io.IOException;
-
-import javax.inject.Inject;
-
-import retrofit.Callback;
-import timber.log.Timber;
 
 /**
  * Created by eliasbagley on 7/8/15.
@@ -29,17 +20,16 @@ public class MediaPicker {
     private static final int REQUEST_VIDEO_CAPTURE = 9235;
     private static final int REQUEST_LOAD_IMAGE = 9236;
 
-    private Callback<MediaContainer> _imageCallback;
-    private Callback<MediaContainer> _videoCallback;
+    private MediaPickerListener<MediaContainer> _imageCallback;
+    private MediaPickerListener<MediaContainer> _videoCallback;
     private StringBuilder _strBuilder;
 
-    @Inject
     public MediaPicker() {
     }
 
     //region photo
 
-    public void takePicture(Activity activity, Callback<MediaContainer> callback) {
+    public void takePicture(Activity activity, MediaPickerListener<MediaContainer> callback) {
         _strBuilder = new StringBuilder();
         _imageCallback = callback;
 
@@ -50,8 +40,7 @@ public class MediaPicker {
             try {
                 photoFile = ImageUtils.createImageFile(_strBuilder);
             } catch (IOException e) {
-                Timber.e("Error occured while creating the file");
-                callback.failure(null);
+                callback.failure("Error occured while creating the file");
                 return;
             }
 
@@ -63,7 +52,7 @@ public class MediaPicker {
         }
     }
 
-    public void pickPhotoFromGallery(Activity activity, Callback<MediaContainer> callback) {
+    public void pickPhotoFromGallery(Activity activity, MediaPickerListener<MediaContainer> callback) {
         _imageCallback = callback;
 
         Intent galleryIntent = new Intent(Intent.ACTION_PICK,
@@ -77,7 +66,7 @@ public class MediaPicker {
 
     //region video
 
-    public void takeVideo(Activity activity, Callback<MediaContainer> callback) {
+    public void takeVideo(Activity activity, MediaPickerListener<MediaContainer> callback) {
         _videoCallback = callback;
 
         Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
@@ -88,7 +77,7 @@ public class MediaPicker {
     }
 
 
-    public void pickVideoFromGallery(Activity activity, Callback<MediaContainer> callback) {
+    public void pickVideoFromGallery(Activity activity, MediaPickerListener<MediaContainer> callback) {
         _videoCallback = callback;
 
         Intent intent = new Intent(Intent.ACTION_PICK);
@@ -103,9 +92,7 @@ public class MediaPicker {
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 if (_imageCallback != null) {
                     ImageContainer imageContainer = new ImageContainer(_strBuilder.toString());
-                   _imageCallback.success(imageContainer, null);
-                } else {
-                    _imageCallback.failure(null);
+                   _imageCallback.success(imageContainer);
                 }
             } else if (requestCode == REQUEST_LOAD_IMAGE) {
                 Uri imageUri = data.getData();
@@ -113,40 +100,46 @@ public class MediaPicker {
                 if (imageUri != null) {
                     String path = Utils.getRealPathFromURI(activity, imageUri);
                     ImageContainer imageContainer = new ImageContainer(path);
-                    _imageCallback.success(imageContainer, null);
+                    if (_imageCallback != null) {
+                        _imageCallback.success(imageContainer);
+                    }
                 } else {
-                    _imageCallback.failure(null);
+                    if (_imageCallback != null) {
+                        _imageCallback.failure("Image URI is null");
+                    }
                 }
             } else if (requestCode == REQUEST_VIDEO_CAPTURE) {
                 Uri videoUri = data.getData();
 
                 if (videoUri != null) {
                     VideoContainer videoContainer = new VideoContainer(activity, videoUri);
-                    _videoCallback.success(videoContainer, null);
+                    if (_videoCallback != null) {
+                        _videoCallback.success(videoContainer);
+                    }
                 } else {
-                    _videoCallback.failure(null);
+                    if (_videoCallback != null) {
+                        _videoCallback.failure("Video URI is null");
+                    }
                 }
             }
         }
     }
 
-    public void showImageSelectionPopup(final Activity activity, View v, final Callback<MediaContainer> callback) {
+    public void showImageSelectionPopup(final Activity activity, View v, final MediaPickerListener<MediaContainer> callback) {
         PopupMenu popup = new PopupMenu(activity, v);
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.take_picture:
-                        takePicture(activity, callback);
-                        return true;
-                    case R.id.picture_from_gallery:
-                        pickPhotoFromGallery(activity, callback);
-                        break;
-                    default:
-                        return false;
+                int id = item.getItemId();
+                if (id == R.id.take_picture) {
+                    takePicture(activity, callback);
+                    return true;
+                } else if (id == R.id.picture_from_gallery) {
+                    pickPhotoFromGallery(activity, callback);
+                    return false;
+                } else {
+                    return false;
                 }
-
-                return false;
             }
         });
 
@@ -156,23 +149,21 @@ public class MediaPicker {
 
     }
 
-    public void showVideoSelectionPopup(final Activity activity, View v, final Callback<MediaContainer> callback) {
+    public void showVideoSelectionPopup(final Activity activity, View v, final MediaPickerListener<MediaContainer> callback) {
         PopupMenu popup = new PopupMenu(activity, v);
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.take_video:
-                        takeVideo(activity, callback);
-                        return true;
-                    case R.id.video_from_gallery:
-                        pickVideoFromGallery(activity, callback);
-                        break;
-                    default:
-                        return false;
+                int id = item.getItemId();
+                if (id == R.id.take_video) {
+                    takeVideo(activity, callback);
+                    return true;
+                } else if (id == R.id.video_from_gallery) {
+                    pickVideoFromGallery(activity, callback);
+                    return false;
+                } else {
+                    return false;
                 }
-
-                return false;
             }
         });
 
@@ -182,29 +173,27 @@ public class MediaPicker {
     }
 
 
-    public void showMediaSelectionPopup(final Activity activity, View v, final Callback<MediaContainer> callback) {
+    public void showMediaSelectionPopup(final Activity activity, View v, final MediaPickerListener<MediaContainer> callback) {
         PopupMenu popup = new PopupMenu(activity, v);
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.take_picture:
-                        takePicture(activity, callback);
-                        return true;
-                    case R.id.picture_from_gallery:
-                        pickPhotoFromGallery(activity, callback);
-                        break;
-                    case R.id.take_video:
-                        takeVideo(activity, callback);
-                        return true;
-                    case R.id.video_from_gallery:
-                        pickVideoFromGallery(activity, callback);
-                        break;
-                    default:
-                        return false;
+                int id = item.getItemId();
+                if (id == R.id.take_video) {
+                    takeVideo(activity, callback);
+                    return true;
+                } else if (id == R.id.video_from_gallery) {
+                    pickVideoFromGallery(activity, callback);
+                    return false;
+                } else if (id == R.id.take_picture) {
+                    takePicture(activity, callback);
+                    return true;
+                } else if (id == R.id.picture_from_gallery) {
+                    pickPhotoFromGallery(activity, callback);
+                    return false;
+                } else {
+                    return false;
                 }
-
-                return false;
             }
         });
 

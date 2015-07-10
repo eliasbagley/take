@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Take</string>
+    <string name="take_picture">Take Photo</string>
+    <string name="take_video">Take Video</string>
+    <string name="picture_from_gallery">Choose Photo From Gallery</string>
+    <string name="video_from_gallery">Choose Video From Gallery</string>
 </resources>

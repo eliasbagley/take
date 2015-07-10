@@ -1,11 +1,12 @@
 apply plugin: 'com.android.application'
+apply plugin: 'hugo'
 
 android {
     compileSdkVersion 22
     buildToolsVersion "21.1.2"
 
     defaultConfig {
-        applicationId "com.eliasbagley.take"
+        applicationId "com.eliasbagley.take.app"
         minSdkVersion 15
         targetSdkVersion 21
         versionCode 1
@@ -22,4 +23,6 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:21.0.3'
+    compile 'com.jakewharton:butterknife:6.1.+'
+    compile project(':take2')
 }
