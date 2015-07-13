@@ -1,5 +1,39 @@
 apply plugin: 'com.android.library'
 
+android {
+    compileSdkVersion 22
+    buildToolsVersion "21.1.2"
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:21.0.3'
+}
+
+
+
+
+
+
+
+
+/////////////////////////////////////////
+// properties for uploading to jcenter
+/////////////////////////////////////////
+
 ext {
     bintrayRepo = 'maven'
     bintrayName = 'take'
@@ -25,31 +59,24 @@ ext {
 
 }
 
-android {
-    compileSdkVersion 22
-    buildToolsVersion "21.1.2"
-
-    defaultConfig {
-        minSdkVersion 15
-        targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
-}
-
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:21.0.3'
-}
 
 
-///////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+/////////////////////////////////////////
+// maven
+/////////////////////////////////////////
 
 apply plugin: 'com.github.dcendents.android-maven'
 
@@ -93,7 +120,22 @@ install {
         }
     }
 }
-///////////
+
+
+
+
+
+
+
+
+
+
+
+
+/////////////////////////////////////////
+// jCenter
+/////////////////////////////////////////
+
 apply plugin: 'com.jfrog.bintray'
 
 version = libraryVersion
@@ -139,7 +181,7 @@ bintray {
         version {
             desc = libraryDescription
             gpg {
-                sign = true //Determines whether to GPG sign the files. The default is false
+                sign = false //Determines whether to GPG sign the files. The default is false
                 passphrase = properties.getProperty("bintray.gpg.password")
                 //Optional. The passphrase for GPG signing'
             }
