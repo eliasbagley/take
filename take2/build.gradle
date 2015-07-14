@@ -40,14 +40,14 @@ ext {
 
     publishedGroupId = 'com.eliasbagley.take'
     libraryName = 'take'
-    artifact = 'take'
+    artifact = 'take2'
 
     libraryDescription = 'Android image and video capture made easy'
 
     siteUrl = 'https://github.com/eliasbagley/take'
     gitUrl = 'https://github.com/eliasbagley/take.git'
 
-    libraryVersion = '0.0.1'
+    libraryVersion = '0.0.2'
 
     developerId = 'eliasbagley'
     developerName = 'Elias Bagley'
